@@ -1,0 +1,44 @@
+{
+  "name": "dikio",
+  "version": "0.0.0",
+  "description": "Dikio is an self-hosted web application to save words you learn in others languages than your native language: it will be your own dictionary.",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha",
+    "build-js": "rollup -c",
+    "build-html": "htmlmin src/index.html -o dist/index.html",
+    "build-css": "cssnano src/css/index.css dist/css/index.min.css",
+    "build": "npm run build-js & npm run build-html & npm run build-css"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cedced19/dikio.git"
+  },
+  "keywords": [
+    "dikio",
+    "dictionary",
+    "web",
+    "application",
+    "language",
+    "languages",
+    "word",
+    "words"
+  ],
+  "author": "Cédric JUNG <cedced19@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/cedced19/dikio/issues"
+  },
+  "homepage": "https://github.com/cedced19/dikio#readme",
+  "devDependencies": {
+    "babel-cli": "^6.18.0",
+    "babel-preset-es2015": "^6.18.0",
+    "babel-preset-es2015-rollup": "^1.2.0",
+    "cssnano-cli": "^1.0.5",
+    "htmlmin": "0.0.7",
+    "mocha": "^3.2.0",
+    "rollup": "^0.36.4",
+    "rollup-plugin-babel": "^2.6.1",
+    "rollup-plugin-uglify": "^1.0.1"
+  }
+}
