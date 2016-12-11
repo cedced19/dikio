@@ -31,3 +31,17 @@ header {
     background-repeat: no-repeat;
     background-position: 2.2em 30%;
 }
+main {
+
+}
+.intro-section {
+  width: 69%;
+  margin: 0 auto;
+  font-size: 1.2em;
+  line-height: 1.4em;
+  color: #000;
+  background: #fff;
+  padding: .5em;
+  border: 1px solid #c8c8c8;
+  border-radius: 2px;
+}
