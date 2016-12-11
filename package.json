@@ -63,6 +63,7 @@
     "debounce": "^1.0.0",
     "env-port": "0.0.0",
     "express": "^4.14.0",
+    "languagedetect": "^1.1.1",
     "mongoose": "^4.7.1",
     "serve-static": "^1.11.1",
     "server-welcome": "0.0.0"

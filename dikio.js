@@ -7,7 +7,8 @@ var app = require('express')(),
     fs = require('fs'),
     join = require('path').join,
     pkg = require('./package.json'),
-    port = require('env-port')('8882');
+    port = require('env-port')('8882'),
+    LanguageDetect = require('languagedetect');
 
 program
     .version(pkg.version)
@@ -18,11 +19,18 @@ if (!isNaN(parseFloat(program.port)) && isFinite(program.port)) {
   port = program.port;
 }
 
-/*
-app.get('/api/words', function (req, res) {
+var lngDetector = new LanguageDetect();
 
+app.get('/api/:word/language/:langs', function (req, res) {
+  var langs = lngDetector.detect(req.params.word);
+  var allowed = req.params.langs.split('-');
+  var origins = [];
+  langs.forEach(function (value, key) {
+    if (allowed.indexOf(value[0]) > -1) origins.push(value);
+  });
+  res.json(origins);
 });
-*/
+
 
 app.disable('x-powered-by');
 
