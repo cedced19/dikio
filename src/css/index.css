@@ -1,4 +1,6 @@
 @import "framework.css";
+@import "select-dropdown.css";
+@import "../../node_modules/notie/dist/notie.css";
 
 body {
     background: #59ABE3;
@@ -34,9 +36,9 @@ header {
 main {
 
 }
-.intro-section {
+main section {
   width: 69%;
-  margin: 0 auto;
+  margin: 20px auto;
   font-size: 1.2em;
   line-height: 1.4em;
   color: #000;
