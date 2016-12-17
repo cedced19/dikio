@@ -2,25 +2,73 @@ import debounce from 'debounce';
 import notie from 'notie';
 import $ from 'jquery';
 
+// Sections
 const introSection = $('#intro-section');
 const languagesSection = $('#languages-section');
+const resultsSection = $('#results-section');
+
 const searchInput = $('#search');
+
+const translatedFrom = $('#translated-from')
+
 const detectedLanguagesList = $('#detected-languages-list');
+const translationsList = $('#translations-list');
+const meaningsList = $('#meanings-list');
+
 const capitalize = function (text) {
-  return text.charAt(0).toUpperCase()+text.substring(1)
+  return text.charAt(0).toUpperCase() + text.substring(1);
 };
 
+const showResults = function (from, to = (navigator.language || navigator.userLanguage)) {
+  var uri = 'https://glosbe.com/gapi/translate?from=' + from +  '&dest=' + to +'&format=json&phrase=' + lastSearch + '&callback=?&pretty=true';
+  $.getJSON(uri, function (result) {
+    translationsList.empty();
+    meaningsList.empty();
+    if (!result.hasOwnProperty('tuc')) return false;
+    // TODO: display a message to show that it's a wrong request
+    result.tuc.forEach(function (value) {
+        if (!value.hasOwnProperty('phrase')) return false;
+        $('<li>').text(value.phrase.text).appendTo(translationsList);
+        if (!value.hasOwnProperty('meanings')) return false;
+        value.meanings.forEach(function (meaning) {
+          $('<li>').text(meaning.text).appendTo(meaningsList);
+        });
+    });
+  });
+}
+
 let spokenLanguages = JSON.parse(localStorage.getItem('spoken-languages')) || [];
+let lastSearch = '';
 
 searchInput.on('keyup', debounce(function () {
-  if (this.value) {
+  lastSearch = this.value;
+  if (lastSearch) {
     introSection.hide();
     languagesSection.hide();
+    resultsSection.show();
   } else {
     introSection.show();
     languagesSection.show();
+    resultsSection.hide();
+    return false;
   }
-}, 400));
+  $.ajax({
+    url: '/api/languages/' + spokenLanguages.join('-') + '/' + lastSearch
+  })
+  .done(function (data) {
+    if (data.length !== 0) {
+      if (data[0].code == (navigator.language || navigator.userLanguage)) {
+        showResults(data[0].code, data[1].code);
+        // TODO: add a button to choose the language to translate to
+        translatedFrom.parent().hide();
+      } else {
+        showResults(data[0].code);
+        translatedFrom.parent().show();
+        translatedFrom.text(capitalize(data[0].name));
+      }
+    }
+  })
+}, 1000));
 
 searchInput.onclick = function () {
   if (!spokenLanguages.length) {
