@@ -13,26 +13,28 @@ const translatedFrom = $('#translated-from')
 
 const detectedLanguagesList = $('#detected-languages-list');
 const translationsList = $('#translations-list');
-const meaningsList = $('#meanings-list');
 
 const capitalize = function (text) {
   return text.charAt(0).toUpperCase() + text.substring(1);
 };
 
 const showResults = function (from, to = (navigator.language || navigator.userLanguage)) {
-  var uri = 'https://glosbe.com/gapi/translate?from=' + from +  '&dest=' + to +'&format=json&phrase=' + lastSearch + '&callback=?&pretty=true';
+  translationsList.empty();
+  let uri = 'https://glosbe.com/gapi/translate?from=' + from +  '&dest=' + to +'&format=json&phrase=' + lastSearch + '&callback=?&pretty=true';
   $.getJSON(uri, function (result) {
-    translationsList.empty();
-    meaningsList.empty();
     if (!result.hasOwnProperty('tuc')) return false;
     // TODO: display a message to show that it's a wrong request
     result.tuc.forEach(function (value) {
         if (!value.hasOwnProperty('phrase')) return false;
-        $('<li>').text(value.phrase.text).appendTo(translationsList);
-        if (!value.hasOwnProperty('meanings')) return false;
-        value.meanings.forEach(function (meaning) {
-          $('<li>').text(meaning.text).appendTo(meaningsList);
-        });
+        let translation = $('<li>').html(value.phrase.text)
+        if (value.hasOwnProperty('meanings')) {
+          let meaningsList = $('<ul>');
+          value.meanings.forEach((meaning) => {
+            $('<li>').html(meaning.text).appendTo(meaningsList);
+          });
+          meaningsList.appendTo(translation);
+        };
+        translation.appendTo(translationsList);
     });
   });
 }
@@ -71,7 +73,7 @@ searchInput.on('keyup', debounce(function () {
 }, 1000));
 
 searchInput.onclick = function () {
-  if (!spokenLanguages.length) {
+  if (spokenLanguages.length == 0) {
     notie.alert(2, 'You have to select some languages before search.', 10)
   }
 }
