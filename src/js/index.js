@@ -16,6 +16,7 @@ const translatedFrom = $('#translated-from')
 // Lists
 const detectedLanguagesList = $('#detected-languages-list');
 const translationsList = $('#translations-list');
+const switchLanguagesList = $('#switch-languages-list');
 
 // Variables
 let spokenLanguages = JSON.parse(localStorage.getItem('spoken-languages')) || [];
@@ -65,10 +66,23 @@ searchInput.on('keyup', debounce(function () {
   .done(function (data) {
     if (data.length !== 0) {
       if (data[0].code == (navigator.language || navigator.userLanguage)) {
-        showResults(data[0].code, data[1].code);
-        // TODO: add a button to choose the language to translate to
+        switchLanguagesList.empty();
+        translationsList.empty();
+        spokenLanguages.forEach(function (value) {
+          if (value == data[0].name) return false;
+          $('<button>').text(capitalize(value))
+                       .on('click', function () {
+                         $.ajax({
+                           url: '/api/languages/' + value
+                         }).done(function (language) {
+                           showResults(data[0].code, language.code);
+                         });
+                       })
+                       .appendTo(switchLanguagesList);
+        });
         translatedFrom.parent().hide();
       } else {
+        switchLanguagesList.empty();
         showResults(data[0].code);
         translatedFrom.parent().show();
         translatedFrom.text(capitalize(data[0].name));
