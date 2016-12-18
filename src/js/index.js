@@ -11,7 +11,8 @@ const resultsSection = $('#results-section');
 const searchInput = $('#search');
 
 // Text
-const translatedFrom = $('#translated-from')
+const translatedFrom = $('#translated-from');
+const translatedTo = $('#translated-to');
 
 // Lists
 const detectedLanguagesList = $('#detected-languages-list');
@@ -32,7 +33,13 @@ const showResults = function (from, to = (navigator.language || navigator.userLa
   let uri = 'https://glosbe.com/gapi/translate?from=' + from +  '&dest=' + to +'&format=json&phrase=' + lastSearch + '&callback=?&pretty=true';
   $.getJSON(uri, function (result) {
     if (!result.hasOwnProperty('tuc')) return false;
-    // TODO: display a message to show that it's a wrong request
+    if (!result.tuc.length) {
+      return $.ajax({
+        url: '/api/language/' + from
+      }).done(function (language) {
+        askTranslateFrom(language.name);
+      });
+    }
     result.tuc.forEach(function (value) {
         if (!value.hasOwnProperty('phrase')) return false;
         let translation = $('<li>').html(value.phrase.text)
@@ -46,7 +53,36 @@ const showResults = function (from, to = (navigator.language || navigator.userLa
         translation.appendTo(translationsList);
     });
   });
-}
+};
+
+const listTranslateBtn = function (cb, excludedLanguage = false) {
+  switchLanguagesList.empty();
+  spokenLanguages.forEach(function (value) {
+    if (value == excludedLanguage) return false;
+    $('<button>').text(capitalize(value))
+                 .on('click', function () {
+                   $.ajax({
+                     url: '/api/language/' + value
+                   }).done(cb);
+                 })
+                 .appendTo(switchLanguagesList);
+  });
+};
+
+const askTranslateFrom = function (excludedLanguage = false) {
+  translationsList.empty();
+  translatedFrom.empty();
+  translatedTo.parent().hide();
+  listTranslateBtn(function (languageFrom) {
+    translatedFrom.text(capitalize(languageFrom.name));
+    translatedTo.parent().show();
+    translatedTo.empty();
+    listTranslateBtn(function (languageTo) {
+      translatedTo.text(capitalize(languageTo.name));
+      showResults(languageFrom.code, languageTo.code);
+    }, languageFrom.name);
+  }, excludedLanguage);
+};
 
 searchInput.on('keyup', debounce(function () {
   lastSearch = this.value;
@@ -66,27 +102,22 @@ searchInput.on('keyup', debounce(function () {
   .done(function (data) {
     if (data.length !== 0) {
       if (data[0].code == (navigator.language || navigator.userLanguage)) {
-        switchLanguagesList.empty();
         translationsList.empty();
-        spokenLanguages.forEach(function (value) {
-          if (value == data[0].name) return false;
-          $('<button>').text(capitalize(value))
-                       .on('click', function () {
-                         $.ajax({
-                           url: '/api/languages/' + value
-                         }).done(function (language) {
-                           showResults(data[0].code, language.code);
-                         });
-                       })
-                       .appendTo(switchLanguagesList);
-        });
-        translatedFrom.parent().hide();
+        translatedFrom.text(capitalize(data[0].name));
+        translatedTo.text('');
+        translatedTo.parent().show();
+        listTranslateBtn(function (language) {
+          showResults((navigator.language || navigator.userLanguage), language.code);
+          translatedTo.text(capitalize(language.name));
+        }, data[0].name);
       } else {
         switchLanguagesList.empty();
         showResults(data[0].code);
-        translatedFrom.parent().show();
         translatedFrom.text(capitalize(data[0].name));
+        translatedTo.parent().hide();
       }
+    } else {
+      askTranslateFrom();
     }
   })
 }, 1000));
@@ -148,4 +179,3 @@ $.ajax({
     }
   });
 });
-// https://glosbe.com/gapi/translate?from=fra&dest=eng&format=json&phrase=papa

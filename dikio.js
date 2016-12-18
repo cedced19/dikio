@@ -30,10 +30,10 @@ app.get('/api/languages/:langs/:word', function (req, res) {
   res.json(origins);
 });
 
-app.get('/api/languages/:langs', function (req, res) {
+app.get('/api/language/:langs', function (req, res) {
   try {
     if (req.params.langs.length <= 2) {
-      return res.json({ name: iso639.getCode('fdfd s'), code: req.params.langs });
+      return res.json({ name: iso639.getName(req.params.langs).toLowerCase(), code: req.params.langs });
     }
     res.json({ name: req.params.langs, code: iso639.getCode(req.params.langs) });
   } catch (e) {
