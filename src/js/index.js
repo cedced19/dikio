@@ -7,13 +7,21 @@ const introSection = $('#intro-section');
 const languagesSection = $('#languages-section');
 const resultsSection = $('#results-section');
 
+// Input
 const searchInput = $('#search');
 
+// Text
 const translatedFrom = $('#translated-from')
 
+// Lists
 const detectedLanguagesList = $('#detected-languages-list');
 const translationsList = $('#translations-list');
 
+// Variables
+let spokenLanguages = JSON.parse(localStorage.getItem('spoken-languages')) || [];
+let lastSearch = '';
+
+// Methods
 const capitalize = function (text) {
   return text.charAt(0).toUpperCase() + text.substring(1);
 };
@@ -38,9 +46,6 @@ const showResults = function (from, to = (navigator.language || navigator.userLa
     });
   });
 }
-
-let spokenLanguages = JSON.parse(localStorage.getItem('spoken-languages')) || [];
-let lastSearch = '';
 
 searchInput.on('keyup', debounce(function () {
   lastSearch = this.value;
@@ -72,11 +77,11 @@ searchInput.on('keyup', debounce(function () {
   })
 }, 1000));
 
-searchInput.onclick = function () {
+searchInput.on('click', function () {
   if (spokenLanguages.length == 0) {
     notie.alert(2, 'You have to select some languages before search.', 10)
   }
-}
+});
 
 $('.dropdown dt a').on('click', function() {
   $('.dropdown dd ul').slideToggle('fast');
