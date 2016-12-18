@@ -85,7 +85,7 @@ const askTranslateFrom = function (excludedLanguage = false) {
 };
 
 searchInput.on('keyup', debounce(function () {
-  lastSearch = this.value;
+  lastSearch = this.value.trim().toLowerCase();
   if (lastSearch) {
     introSection.hide();
     languagesSection.hide();
