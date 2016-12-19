@@ -21,11 +21,40 @@ const switchLanguagesList = $('#switch-languages-list');
 
 // Variables
 let spokenLanguages = JSON.parse(localStorage.getItem('spoken-languages')) || [];
+let languagesArray = JSON.parse(localStorage.getItem('languages-array')) || [];
 let lastSearch = '';
 
 // Methods
 const capitalize = function (text) {
   return text.charAt(0).toUpperCase() + text.substring(1);
+};
+
+const getObjectArray = function (array, property, value) {
+  for (var i in array) {
+    if (array[i][property] == value) {
+      return array[i];
+    }
+  }
+  return false;
+};
+
+const getLanguageInfo = function (language, cb) {
+  let property = 'name';
+  if (language.length < 3) {
+    property = 'code';
+  }
+  let data = getObjectArray(languagesArray, property, language);
+  if (data) {
+    cb(data);
+  } else {
+    $.ajax({
+      url: '/api/language/' + language
+    }).done(function (data) {
+      languagesArray.push(data);
+      localStorage.setItem('languages-array', JSON.stringify(languagesArray));
+      cb(data);
+    });
+  }
 };
 
 const showResults = function (from, to = (navigator.language || navigator.userLanguage)) {
@@ -34,9 +63,7 @@ const showResults = function (from, to = (navigator.language || navigator.userLa
   $.getJSON(uri, function (result) {
     if (!result.hasOwnProperty('tuc')) return false;
     if (!result.tuc.length) {
-      return $.ajax({
-        url: '/api/language/' + from
-      }).done(function (language) {
+      return getLanguageInfo(from, function (language) {
         askTranslateFrom(language.name);
       });
     }
@@ -61,9 +88,7 @@ const listTranslateBtn = function (cb, excludedLanguage = false) {
     if (value == excludedLanguage) return false;
     $('<button>').text(capitalize(value))
                  .on('click', function () {
-                   $.ajax({
-                     url: '/api/language/' + value
-                   }).done(cb);
+                   getLanguageInfo(value, cb);
                  })
                  .appendTo(switchLanguagesList);
   });
