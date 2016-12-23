@@ -1,8 +1,0 @@
-var mongoose = require('mongoose');
-
-var wordSchema = mongoose.Schema({
-  _id: Number,
-  translations: [{ type: Schema.Types.ObjectId, ref: 'Translation' }]
-});
-
-module.exports = mongoose.model('Word', wordSchema);
